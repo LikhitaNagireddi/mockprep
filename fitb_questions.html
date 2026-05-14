@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Fill in the Blanks</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+    import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "interview-practice-website.firebaseapp.com",
+      projectId: "interview-practice-website",
+      storageBucket: "interview-practice-website.appspot.com",
+      messagingSenderId: "YOUR_SENDER_ID",
+      appId: "YOUR_APP_ID"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const params = new URLSearchParams(window.location.search);
+    const subject = params.get("subject") || "java";
+    document.title = `Fill in the Blanks - ${subject.toUpperCase()}`;
+
+    document.addEventListener("DOMContentLoaded", async () => {
+      document.getElementById("subject-title").textContent = subject.toUpperCase();
+
+      const q = query(
+        collection(db, "mock_questions"),
+        where("subject", "==", subject),
+        where("type", "==", "fitb")
+      );
+
+      const snapshot = await getDocs(q);
+      const container = document.getElementById("questions");
+
+      if (snapshot.empty) {
+        container.innerHTML = "<p>No questions found.</p>";
+        return;
+      }
+
+      let index = 1;
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        const correctAnswer = data.answer ? data.answer.trim().toLowerCase() : "";
+
+        const qBox = document.createElement("div");
+        qBox.className = "question-box";
+        qBox.innerHTML = `
+          <p><strong>Q${index}:</strong> ${data.question}</p>
+          <input type="text" class="answer" data-correct="${correctAnswer}" placeholder="Your answer..." />
+        `;
+        container.appendChild(qBox);
+        index++;
+      });
+
+      // Show Submit Button
+      document.getElementById("submitBtn").style.display = "block";
+    });
+
+    window.checkAnswers = () => {
+      const inputs = document.querySelectorAll(".answer");
+      let correctCount = 0;
+
+      inputs.forEach(input => {
+        const userAns = (input.value || "").trim().toLowerCase();
+        const correctAns = input.dataset.correct || "";
+
+        if (userAns === correctAns) {
+          input.style.border = "2px solid green";
+          correctCount++;
+        } else {
+          input.style.border = "2px solid red";
+        }
+      });
+
+      alert(`✅ You got ${correctCount} / ${inputs.length} correct.`);
+    };
+  </script>
+
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f1f3f5;
+      margin: 0;
+      padding: 40px 20px;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .question-box {
+      background: white;
+      padding: 20px;
+      margin: 15px auto;
+      max-width: 800px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    input.answer {
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+      margin-top: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+
+    #submitBtn {
+      display: none;
+      background-color: #2196f3;
+      color: white;
+      font-size: 18px;
+      border: none;
+      padding: 12px 25px;
+      margin: 30px auto;
+      display: block;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    #submitBtn:hover {
+      background-color: #0d8bde;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Fill in the Blanks - <span id="subject-title">Loading...</span></h1>
+  <div id="questions"></div>
+  <button id="submitBtn" onclick="checkAnswers()">Submit Answers</button>
+
+</body>
+</html>
+
+

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Add Interview Question | MockPrep</title>
+  <script type="module" src="question.js" defer></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f8fb;
+      padding: 40px;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: auto;
+      background: #fff;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    h2 {
+      text-align: center;
+      color: #2c3e50;
+    }
+
+    label {
+      font-weight: bold;
+      display: block;
+      margin-top: 15px;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      margin-top: 20px;
+      width: 100%;
+      background-color: #1abc9c;
+      color: white;
+      padding: 12px;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .status {
+      margin-top: 15px;
+      font-weight: bold;
+      color: green;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Add Interview Question</h2>
+    <form id="questionForm">
+      <label for="question">Question</label>
+      <textarea id="question" required></textarea>
+
+      <label for="subject">Subject</label>
+      <select id="subject" required>
+        <option value="">Select</option>
+        <option>Java</option>
+        <option>DSA</option>
+        <option>JavaScript</option>
+        <option>Python</option>
+        <option>OS</option>
+        <option>CN</option>
+        <option>Frontend</option>
+        <option>Fullstack</option>
+        <option>AI/ML</option>
+        <option>Cloud</option>
+      </select>
+
+      <label for="type">Type</label>
+      <select id="type" required>
+        <option value="">Select</option>
+        <option value="Technical">Technical</option>
+        <option value="HR">HR</option>
+        <option value="MCQ">MCQ</option>
+      </select>
+
+      <label for="level">Difficulty Level</label>
+      <select id="level" required>
+        <option value="">Select</option>
+        <option>Easy</option>
+        <option>Medium</option>
+        <option>Hard</option>
+      </select>
+
+      <button type="submit">Add Question</button>
+      <div class="status" id="status"></div>
+    </form>
+  </div>
+</body>
+</html>

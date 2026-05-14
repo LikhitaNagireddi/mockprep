@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Mock Interview</title>
+  <style>
+    body {
+      margin: 0;
+      display: flex;
+      height: 100vh;
+      font-family: 'Segoe UI', sans-serif;
+    }
+    .transcript-area {
+      flex: 2;
+      padding: 20px;
+      background: #f0f4f7;
+      overflow-y: auto;
+    }
+    .video-area {
+      flex: 1;
+      padding: 20px;
+      background: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
+    }
+    video {
+      width: 220px;
+      height: 160px;
+      border-radius: 10px;
+      border: 2px solid #ccc;
+    }
+    h2 {
+      margin-bottom: 10px;
+    }
+    #question {
+      font-size: 18px;
+      margin-bottom: 20px;
+      font-weight: bold;
+    }
+    #transcript {
+      background: white;
+      padding: 15px;
+      border-radius: 10px;
+      height: 300px;
+      font-size: 16px;
+      white-space: pre-wrap;
+      box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+      overflow-y: auto;
+    }
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      background-color: #1abc9c;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="transcript-area">
+    <h2>Transcript</h2>
+    <div id="question">Loading question...</div>
+    <div id="transcript">Start speaking...</div>
+    <button id="nextBtn">Next Question</button>
+    <button id="endMockBtn">✅ End Mock Session</button>
+  </div>
+
+  <div class="video-area">
+    <video id="video" autoplay muted></video>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+    import {
+      getFirestore, doc, getDoc, setDoc, collection, query, where, getDocs
+    } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+    import {
+      getAuth, onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDEGFN4ESTLI1aLHAobBvPJwOlRYuw5gQI",
+      authDomain: "interview-practice-website.firebaseapp.com",
+      projectId: "interview-practice-website",
+      storageBucket: "interview-practice-website.appspot.com",
+      messagingSenderId: "779044973158",
+      appId: "1:779044973158:web:e5f8406a74b5be56929ba7"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+
+    const questionBox = document.getElementById("question");
+    const transcriptEl = document.getElementById("transcript");
+    const nextBtn = document.getElementById("nextBtn");
+    const endMockBtn = document.getElementById("endMockBtn");
+
+    let questions = [], currentIndex = 0;
+    let finalTranscript = "";
+    const mockStartTime = new Date();
+
+    const params = new URLSearchParams(window.location.search);
+    const subject = params.get("subject") || "java";
+    const type = params.get("type") || "tech";
+
+    // 🔁 Load Firestore questions
+    async function loadQuestions() {
+      const q = query(
+        collection(db, "mock_questions"),
+        where("subject", "==", subject),
+        where("type", "==", type)
+      );
+      const snapshot = await getDocs(q);
+      questions = snapshot.docs.map(doc => doc.data().question);
+      if (questions.length === 0) {
+        questionBox.textContent = "No questions found.";
+        nextBtn.disabled = true;
+      } else {
+        showQuestion();
+      }
+    }
+
+    function showQuestion() {
+      if (currentIndex < questions.length) {
+        questionBox.textContent = `Q${currentIndex + 1}: ${questions[currentIndex]}`;
+      } else {
+        questionBox.textContent = "No more questions.";
+        nextBtn.disabled = true;
+      }
+    }
+
+    nextBtn.addEventListener("click", () => {
+      finalTranscript += `\n🟢 Answer for Q${currentIndex + 1}:\n`;
+      currentIndex++;
+      showQuestion();
+    });
+
+    // 🎤 Speech Recognition
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.lang = "en-US";
+
+    recognition.onresult = (event) => {
+      let interim = "";
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const transcript = event.results[i][0].transcript;
+        if (event.results[i].isFinal) {
+          finalTranscript += transcript + "\n";
+        } else {
+          interim += transcript;
+        }
+      }
+      transcriptEl.textContent = finalTranscript + interim;
+    };
+
+    recognition.onend = () => recognition.start();
+    recognition.start();
+
+    // 🎥 Webcam
+    navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+      .then(stream => { document.getElementById("video").srcObject = stream; })
+      .catch(() => alert("Please allow camera and mic access."));
+
+    // 🟩 End mock and update score if >= 1 min
+    endMockBtn.addEventListener("click", async () => {
+      const mockEndTime = new Date();
+      const duration = (mockEndTime - mockStartTime) / 60000;
+
+      if (duration >= 1) {
+        const user = auth.currentUser;
+        if (!user) {
+          alert("You must be logged in.");
+          return;
+        }
+
+        const uid = user.uid;
+        const ref = doc(db, "scores", uid);
+        let data = {
+          coding: 0,
+          mcq: 0,
+          tech: 0,
+          hr: 0,
+          daily: 0
+        };
+
+        const snapshot = await getDoc(ref);
+        if (snapshot.exists()) data = snapshot.data();
+
+        // Increment tech and recalculate daily
+        data.tech = (data.tech || 0) + 1;
+        data.daily = (data.coding || 0) + (data.mcq || 0) + (data.tech || 0) + (data.hr || 0);
+
+        await setDoc(ref, data);
+        alert("✅ Mock complete! Tech and daily score updated.");
+      } else {
+        alert("⏱️ Please complete at least 1 minute of mock session.");
+      }
+    });
+
+    loadQuestions();
+  </script>
+</body>
+</html>
+
+

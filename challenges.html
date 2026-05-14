@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Daily Challenges | MockPrep</title>
+  <link rel="stylesheet" href="challenges.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+</head>
+<body>
+
+ <div class="sidebar">
+    <h2>MockPrep</h2>
+    <ul class="nav-list">
+      <li><a href="home.html"><i class="fas fa-home"></i> Home</a></li>
+      <li><a href="practice.html"><i class="fas fa-laptop-code"></i> Practice</a></li>
+      <li><a href="categories.html"><i class="fas fa-list-ul"></i> Categories</a></li>
+      <li><a href="challenges.html"><i class="fas fa-bolt"></i> Daily Challenges</a></li>
+      <li><a href="timer.html"><i class="fas fa-stopwatch"></i> Timer Mode</a></li>
+      <li><a href="progress.html"><i class="fas fa-chart-line"></i> Progress</a></li>
+      <li><a href="resource.html"><i class="fas fa-book-open"></i> Resources</a></li>
+      <li><a href="profile.html"><i class="fas fa-user"></i> Profile</a></li>
+      <li><a href="scoreboard.html"><i class="fas fa-trophy"></i> Scoreboard</a></li>
+    
+      <li><a href="../signin/signin.html"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+    </ul>
+  </div>
+  <!-- Main Content -->
+  <div class="main-content">
+    <h1>Daily Challenges</h1>
+    <div class="streak-box">🔥 Current Streak: <span id="streakCount">0 Days</span></div>
+
+    <div class="challenge-grid">
+      <div class="challenge-card">Java</div>
+      <div class="challenge-card">DSA</div>
+      <div class="challenge-card">Frontend</div>
+      <div class="challenge-card">Full Stack</div>
+      <div class="challenge-card">OS</div>
+      <div class="challenge-card">CN</div>
+      <div class="challenge-card">Python</div>
+      <div class="challenge-card">C++</div>
+      <div class="challenge-card">C</div>
+      <div class="challenge-card">AI / ML</div>
+      <div class="challenge-card">AWS / Cloud</div>
+      <div class="challenge-card">S.E</div>
+    </div>
+  </div>
+</body>
+</html>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+import {
+  getFirestore,
+  collection,
+  query,
+  where,
+  getDocs
+} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDEGFN4ESTLI1aLHAobBvPJwOlRYuw5gQI",
+  authDomain: "interview-practice-website.firebaseapp.com",
+  projectId: "interview-practice-website"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const STREAK_KEY = 'mockprep_streak';
+const LAST_DATE_KEY = 'mockprep_last_date';
+
+function formatDate(date) {
+  return date.toISOString().split('T')[0];
+}
+
+function updateStreakDisplay(count) {
+  document.getElementById('streakCount').textContent = `${count} Days`;
+}
+
+function loadStreak() {
+  const lastDate = localStorage.getItem(LAST_DATE_KEY);
+  const streak = parseInt(localStorage.getItem(STREAK_KEY)) || 0;
+  const today = formatDate(new Date());
+
+  if (lastDate === today) {
+    updateStreakDisplay(streak);
+    return;
+  }
+
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  const yesterdayStr = formatDate(yesterday);
+
+  if (lastDate === yesterdayStr) {
+    const newStreak = streak + 1;
+    localStorage.setItem(STREAK_KEY, newStreak);
+    localStorage.setItem(LAST_DATE_KEY, today);
+    updateStreakDisplay(newStreak);
+  } else {
+    localStorage.setItem(STREAK_KEY, 1);
+    localStorage.setItem(LAST_DATE_KEY, today);
+    updateStreakDisplay(1);
+  }
+}
+
+window.addEventListener('DOMContentLoaded', loadStreak);
+
+// ✅ Fetch random coding question
+async function getRandomQuestion(subject) {
+  const q = query(
+    collection(db, "mock_questions"),
+    where("subject", "==", subject.toLowerCase()),
+    where("type", "==", "coding")
+  );
+
+  const snapshot = await getDocs(q);
+  const questions = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+  if (questions.length === 0) {
+    alert("No questions found for " + subject);
+    return;
+  }
+
+  const randomIndex = Math.floor(Math.random() * questions.length);
+  const question = questions[randomIndex];
+
+  // Save question in localStorage (optional)
+  localStorage.setItem("daily_challenge_question", JSON.stringify(question));
+
+  // Redirect to compiler with subject and question ID
+  window.location.href = `compiler.html?subject=${subject}&qid=${question.id}&daily=true`;
+}
+
+// ✅ Setup click for challenge cards
+document.querySelectorAll('.challenge-card').forEach(card => {
+  card.addEventListener('click', () => {
+    const subject = card.textContent.trim();
+    getRandomQuestion(subject);
+  });
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,130 @@
+body {
+  margin: 0;
+  font-family: 'Segoe UI', sans-serif;
+  display: flex;
+  background-color: #f0f4f8;
+  height: 100vh;
+}
+
+/* Sidebar stays fixed on the left */
+.sidebar {
+  width: 230px;
+  background-color: #2c3e50;
+  color: #fff;
+  padding: 30px 20px;
+  height: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+}
+
+.sidebar h2 {
+  font-size: 22px;
+  margin-bottom: 30px;
+}
+
+.nav-list {
+  list-style: none;
+  padding: 0;
+}
+
+.nav-list li {
+  margin: 20px 0;
+}
+
+.nav-list li a {
+  color: white;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 18px;
+  font-weight: 500;
+  padding: 10px 0;
+  transition: all 0.3s ease;
+}
+
+.nav-list li a:hover,
+.nav-list li.active a {
+  color: #1abc9c;
+}
+
+/* Main content is pushed to the right */
+.main-content {
+  margin-left: 250px; /* matches or slightly more than sidebar width */
+  padding: 40px;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.main-content h1 {
+  font-size: 28px;
+  margin-bottom: 30px;
+  text-align: center;
+  color: #2c3e50;
+}
+.profile-card {
+  background-color: white;
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 30px;
+  border-radius: 16px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  font-size: 16px;
+  color: #333;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.profile-card label {
+  font-weight: 600;
+  margin-top: 10px;
+}
+
+.profile-card input,
+.profile-card textarea {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 15px;
+}
+
+textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.avatar {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.avatar img {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  border: 3px solid #1abc9c;
+}
+
+#save-btn {
+  background-color: #1abc9c;
+  color: white;
+  padding: 12px;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+#save-btn:hover {
+  background-color: #16a085;
+}
+
+#status-msg {
+  text-align: center;
+  color: green;
+  font-weight: bold;
+}

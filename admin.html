@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Upload New FITB Questions</title>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "interview-practice-website.firebaseapp.com",
+      projectId: "interview-practice-website",
+      storageBucket: "interview-practice-website.appspot.com",
+      messagingSenderId: "YOUR_SENDER_ID",
+      appId: "YOUR_APP_ID"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const fitbQuestions = [
+
+    ];
+
+    async function uploadQuestions() {
+      for (const q of fitbQuestions) {
+        await addDoc(collection(db, "mock_questions"), {
+          subject: q.subject,
+          type: "fitb",
+          difficulty: q.difficulty,
+          question: q.question,
+          answer: q.answer,
+          timestamp: new Date()
+        });
+        console.log("Uploaded:", q.question);
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", async () => {
+      await uploadQuestions();
+      alert("✅ New FITB Questions Uploaded Successfully!");
+    });
+  </script>
+</head>
+<body>
+  <h2>Uploading Fill in the Blank Questions...</h2>
+</body>
+</html>
+
+
+
+

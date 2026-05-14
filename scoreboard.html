@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Scoreboard | MockPrep</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="scoreboard.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script type="module" src="scoreboard.js" defer></script>
+</head>
+<body>
+
+  <div class="sidebar">
+    <h2>MockPrep</h2>
+    <ul class="nav-list">
+      <li><a href="home.html">Home</a></li>
+      <li><a href="practice.html">Practice</a></li>
+      <li><a href="categories.html">Categories</a></li>
+      <li><a href="challenges.html">Daily Challenges</a></li>
+      <li><a href="timer.html">Timer Mode</a></li>
+      <li><a href="progress.html">Progress</a></li>
+      <li><a href="resource.html">Resources</a></li>
+      <li><a href="profile.html">Profile</a></li>
+      <li><a href="scoreboard.html">Scoreboard</a></li>
+      <li><a href="../signin/signin.html">Logout</a></li>
+    </ul>
+  </div>
+
+  <div class="main-content">
+    <h1>Your Score</h1>
+   <div class="score-box">
+  <p><strong>Name:</strong> <span id="user-name">Loading...</span></p>
+  <p><strong>Total Score:</strong> <span id="total-score">0</span></p>
+  <button onclick="resetScores()">🔁 Reset Scores</button>
+</div>
+
+
+<h2>Score Breakdown</h2>
+<canvas id="scoreChart" width="600" height="300"></canvas>
+
+<!-- ✅ Leaderboard Section -->
+<h2 style="margin-top: 40px;">🏆 Top 3 Leaderboard</h2>
+<table class="leaderboard-table">
+  <thead>
+    <tr>
+      <th>Rank</th>
+      <th>User</th>
+      <th>Score</th>
+    </tr>
+  </thead>
+  <tbody class="leaderboard">
+    <!-- leaderboard rows will be inserted here -->
+  </tbody>
+</table>
+
+  </div>
+</body>
+</html>
+

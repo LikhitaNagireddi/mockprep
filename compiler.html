@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Online Compiler | MockPrep</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.2/axios.min.js"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f7f9fc;
+      padding: 20px;
+    }
+    .container {
+      max-width: 900px;
+      margin: auto;
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .question-box {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+    }
+    textarea {
+      width: 100%;
+      height: 300px;
+      font-family: monospace;
+      font-size: 16px;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+    select, button {
+      margin-top: 10px;
+      padding: 10px 15px;
+      font-size: 16px;
+      border-radius: 6px;
+    }
+    #output {
+      white-space: pre-wrap;
+      background: #eee;
+      padding: 10px;
+      border-radius: 8px;
+      margin-top: 15px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2 id="question-title">Loading question...</h2>
+
+    <div class="question-box">
+      <label for="language">Language:</label>
+      <select id="language">
+        <option value="java">Java</option>
+        <option value="cpp">C++</option>
+        <option value="c">C</option>
+        <option value="python">Python</option>
+        <option value="javascript">JavaScript</option>
+      </select>
+
+      <textarea id="code" placeholder="// Write your code here..."></textarea>
+      <br />
+      <button onclick="runCode()">Run Code</button>
+
+      <h3>Output:</h3>
+      <div id="output">--</div>
+    </div>
+  </div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+  import { getFirestore, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDEGFN4ESTLI1aLHAobBvPJwOlRYuw5gQI",
+    authDomain: "interview-practice-website.firebaseapp.com",
+    projectId: "interview-practice-website",
+    storageBucket: "interview-practice-website.appspot.com",
+    messagingSenderId: "779044973158",
+    appId: "1:779044973158:web:e5f8406a74b5be56929ba7"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  let currentUser = null;
+  let questionText = "Loading...";
+
+  const params = new URLSearchParams(window.location.search);
+  const qid = params.get("qid");
+  const subject = params.get("subject") || "coding";
+  const isDaily = params.get("daily") === "true";
+
+  // Load question from Firestore
+  async function loadQuestion() {
+    if (!qid) return;
+    const questionRef = doc(db, "mock_questions", qid);
+    const snapshot = await getDoc(questionRef);
+    if (snapshot.exists()) {
+      const data = snapshot.data();
+      questionText = data.question || "No question found.";
+      document.getElementById("question-title").textContent = questionText;
+    } else {
+      document.getElementById("question-title").textContent = "Question not found.";
+    }
+  }
+
+  onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      currentUser = user;
+      await loadQuestion();
+    } else {
+      alert("Please sign in first.");
+      window.location.href = "../signin/signin.html";
+    }
+  });
+
+  const languageMap = {
+    java: 62,
+    cpp: 54,
+    c: 50,
+    python: 71,
+    javascript: 63
+  };
+
+  const startTime = new Date();
+
+  window.runCode = async function () {
+    const code = document.getElementById("code").value;
+    const lang = document.getElementById("language").value;
+    const outputEl = document.getElementById("output");
+
+    outputEl.textContent = "Running...";
+
+    try {
+      const submitRes = await axios.post("https://judge0-ce.p.rapidapi.com/submissions", {
+        source_code: code,
+        language_id: languageMap[lang],
+        stdin: "",
+      }, {
+        headers: {
+          "content-type": "application/json",
+          "X-RapidAPI-Key": "b3c8a868c9mshce7bb946e75d441p19a0f1jsn23ed0c7f3f20",
+          "X-RapidAPI-Host": "judge0-ce.p.rapidapi.com"
+        },
+        params: { base64_encoded: "false", fields: "*" }
+      });
+
+      const token = submitRes.data.token;
+
+      setTimeout(async () => {
+        const resultRes = await axios.get(`https://judge0-ce.p.rapidapi.com/submissions/${token}`, {
+          headers: {
+            "X-RapidAPI-Key": "b3c8a868c9mshce7bb946e75d441p19a0f1jsn23ed0c7f3f20",
+            "X-RapidAPI-Host": "judge0-ce.p.rapidapi.com"
+          },
+          params: { base64_encoded: "false", fields: "*" }
+        });
+
+        const result = resultRes.data;
+        const output = result.stdout || result.stderr || result.compile_output || "No output";
+        outputEl.textContent = output;
+
+        const passed = result.stdout ? "Passed" : "Failed";
+
+        // Save progress to localStorage without duplication
+        let progressData = JSON.parse(localStorage.getItem("mockprep_progress")) || [];
+        const alreadyExists = progressData.some(p => p.question === questionText);
+        if (!alreadyExists) {
+          progressData.push({
+            question: questionText,
+            date: new Date().toISOString().split("T")[0],
+            time: Math.floor((new Date() - startTime) / 60000) + " min",
+            result: passed
+          });
+          localStorage.setItem("mockprep_progress", JSON.stringify(progressData));
+        }
+
+        if (passed === "Passed" && currentUser) {
+          const scoreRef = doc(db, "scores", currentUser.uid);
+          const snap = await getDoc(scoreRef);
+
+          if (snap.exists()) {
+            const data = snap.data();
+            await updateDoc(scoreRef, {
+              coding: (data.coding || 0) + 1
+            });
+          } else {
+            await setDoc(scoreRef, {
+              coding: 1, mcq: 0, tech: 0, hr: 0, daily: 0
+            });
+          }
+
+          // ✅ Handle daily streak
+          if (isDaily) {
+            const today = new Date().toISOString().split("T")[0];
+            const lastDate = localStorage.getItem("mockprep_last_date");
+            const oldStreak = parseInt(localStorage.getItem("mockprep_streak")) || 0;
+
+            if (lastDate !== today) {
+              const yesterday = new Date();
+              yesterday.setDate(yesterday.getDate() - 1);
+              const yesterdayStr = yesterday.toISOString().split("T")[0];
+
+              let newStreak = 0;
+              if (lastDate === yesterdayStr) {
+                newStreak = oldStreak + 1;
+              }
+
+              localStorage.setItem("mockprep_streak", newStreak);
+              localStorage.setItem("mockprep_last_date", today);
+              alert("✅ Daily Challenge Completed! Streak: " + newStreak);
+            } else {
+              alert("You've already completed today's daily challenge.");
+            }
+          }
+        }
+
+      }, 2000);
+
+    } catch (err) {
+      document.getElementById("output").textContent = "Error executing code.";
+      console.error("Execution error:", err);
+    }
+  };
+</script>
+</body>
+</html>

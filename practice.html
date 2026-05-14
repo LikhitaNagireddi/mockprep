@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Practice | MockPrep</title>
+  <link rel="stylesheet" href="practice.css" />
+  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+</head>
+<body>
+
+  <div class="sidebar">
+    <h2>MockPrep</h2>
+    <ul class="nav-list">
+      <li><a href="home.html"><i class="fas fa-home"></i> Home</a></li>
+      <li class="active"><a href="practice.html"><i class="fas fa-laptop-code"></i> Practice</a></li>
+      <li><a href="categories.html"><i class="fas fa-list-ul"></i> Categories</a></li>
+      <li><a href="challenges.html"><i class="fas fa-bolt"></i> Daily Challenges</a></li>
+      <li><a href="timer.html"><i class="fas fa-stopwatch"></i> Timer Mode</a></li>
+      <li><a href="progress.html"><i class="fas fa-chart-line"></i> Progress</a></li>
+      <li><a href="resource.html"><i class="fas fa-book-open"></i> Resources</a></li>
+      <li><a href="practice.html"><i class="fas fa-user"></i> Profile</a></li>
+      <li><a href="scoreboard.html"><i class="fas fa-trophy"></i> Scoreboard</a></li>
+    
+      <li><a href="../signin/signin.html"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+    </ul>
+  </div>
+
+ <div class="main-content">
+  <h1>Choose Your Practice Mode</h1>
+  <div class="cards-wrapper">
+    <div class="practice-card"><a href="coding.html" class="c">🧑‍💻<br/>Coding Questions</a></div>
+    <div class="practice-card">🧠<br/><a href="fill.html" class="m">Fill in the blank </a></div>
+    <div class="practice-card"><a href="categories.html" class="t">🛠️<br/>Tech Interview</a></div>
+    <div class="practice-card"><!-- HR Interview (Initially locked) -->
+<li id="hr-interview" class="locked">
+  <a href="#" onclick="checkHRAccess(event)" class="h">
+    <i class="fas fa-user-tie"></i> HR Interview
+    <span id="hr-lock-icon">🔒</span>
+  </a>
+</li>
+</div>
+
+  </div>
+  
+</div>
+
+
+</body>
+</html>
